@@ -8,11 +8,20 @@ import android.util.Log;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
+import com.couchbase.lite.Emitter;
 import com.couchbase.lite.Manager;
+import com.couchbase.lite.Mapper;
+import com.couchbase.lite.Query;
+import com.couchbase.lite.QueryEnumerator;
+import com.couchbase.lite.QueryRow;
+import com.couchbase.lite.UnsavedRevision;
+import com.couchbase.lite.View;
 import com.couchbase.lite.android.AndroidContext;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -24,10 +33,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        createCBL();
+        try {
+            createCBL();
+        } catch (CouchbaseLiteException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void createCBL() {
+    private void createCBL() throws CouchbaseLiteException {
         try {
             manager = new Manager(new AndroidContext(this), Manager.DEFAULT_OPTIONS);
             database = manager.getDatabase(DB_NAME);
@@ -42,9 +55,30 @@ public class MainActivity extends AppCompatActivity {
         updateDoc(database, documentId);
 
         outputContents(database, documentId);
-        /*addAttachment(database, documentId);
 
-        outputContentsWithAttachment(database, documentId);*/
+        View viewByName = database.getView("name");
+        viewByName.setMap(new Mapper() {
+            @Override
+            public void map(Map<String, Object> document, Emitter emitter) {
+                Object nameWise = document.get("name");
+                if (nameWise != null) {
+                    emitter.emit(nameWise.toString(), document.get("address"));
+                }
+            }
+        }, "1.0");
+
+        Query query = database.getView("name").createQuery();
+
+        query.setMapOnly(true);
+        QueryEnumerator queryEnumerator = query.run();
+        for(Iterator<QueryRow> it = queryEnumerator; it.hasNext();){
+            QueryRow row = it.next();
+            String address = (String) row.getValue();
+            Log.e(TAG,"Address - { " + address + " }");
+        }
+        //addAttachment(database, documentId);
+
+        //outputContentsWithAttachment(database, documentId);
     }
 
     private void updateDoc(Database database, String documentId) {
