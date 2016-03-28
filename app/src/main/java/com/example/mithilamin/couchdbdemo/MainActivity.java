@@ -14,6 +14,7 @@ import com.couchbase.lite.Mapper;
 import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.QueryRow;
+import com.couchbase.lite.Reducer;
 import com.couchbase.lite.UnsavedRevision;
 import com.couchbase.lite.View;
 import com.couchbase.lite.android.AndroidContext;
@@ -22,6 +23,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -57,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         outputContents(database, documentId);
 
         View viewByName = database.getView("name");
-        viewByName.setMap(new Mapper() {
+        viewByName.setMapReduce(new Mapper() {
             @Override
             public void map(Map<String, Object> document, Emitter emitter) {
                 Object nameWise = document.get("name");
@@ -65,7 +67,13 @@ public class MainActivity extends AppCompatActivity {
                     emitter.emit(nameWise.toString(), document.get("address"));
                 }
             }
-        }, "1.0");
+        }, new Reducer() {
+            @Override
+            public Object reduce(List<Object> keys, List<Object> values, boolean rereduce) {
+                Log.e(TAG,"reduce size " + values.size());
+                return new Integer(values.size());
+            }
+        }, "2.0");
 
         Query query = database.getView("name").createQuery();
 
