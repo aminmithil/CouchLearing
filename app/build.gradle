@@ -5,7 +5,7 @@ android {
     buildToolsVersion "23.0.2"
 
     defaultConfig {
-        applicationId "com.example.mithilamin.couchdbdemo"
+        applicationId "com.example.mithilamin.cblapp"
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 1
@@ -18,9 +18,8 @@ android {
         }
     }
     packagingOptions {
-        exclude 'META-INF/ASL2.0'
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE' // will not include NOTICE file
+        exclude 'META-INF/LICENSE' // will not include LICENSE file
     }
 }
 

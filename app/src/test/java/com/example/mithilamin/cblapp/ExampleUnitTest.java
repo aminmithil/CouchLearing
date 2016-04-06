@@ -1,4 +1,4 @@
-package com.example.mithilamin.couchdbdemo;
+package com.example.mithilamin.cblapp;
 
 import org.junit.Test;
 
