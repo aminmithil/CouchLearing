@@ -1,4 +1,4 @@
-package com.example.mithilamin.couchdbdemo;
+package com.example.mithilamin.cblapp;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
